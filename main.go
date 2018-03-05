@@ -22,7 +22,7 @@ func sendMessage(url, message string) {
 }
 
 func everyHour(f func()) {
-	d := time.Minute
+	d := time.Second * 3
 	t := time.NewTimer(d)
 	for {
 		select {
@@ -33,13 +33,30 @@ func everyHour(f func()) {
 	}
 }
 
+func nextMonday(now time.Time) time.Time {
+	var dayDiff int
+	if now.Weekday() == time.Sunday {
+		dayDiff = 7
+	} else {
+		dayDiff = 7 - int(now.Weekday()-time.Monday)
+	}
+	oneDay := time.Hour * 24
+	return now.Add(oneDay * time.Duration(dayDiff))
+}
+
 func main() {
 	url, exists := os.LookupEnv("RETRO_RACH_URL")
 	if !exists {
 		log.Fatal("'RETRO_RACH_URL' environmental variable is undefined")
 	}
 
+	now := time.Now().Add(time.Hour * 24)
+	nextMonday := nextMonday(now)
+	nextNotification := time.Date(nextMonday.Year(), nextMonday.Month(), nextMonday.Day(), 9, 30, 0, 0, nextMonday.Location())
+	log.Printf("Now: %s, nextMonday: %s, nextNotifcation: %s", now, nextMonday, nextNotification)
+
 	everyHour(func() {
-		sendMessage(url, "oh hellooooooo there")
+		fmt.Println("AAA")
+		_ = url
 	})
 }
